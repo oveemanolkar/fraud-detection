@@ -181,7 +181,8 @@ def predict():
         prediction    = model.predict(row)[0]           # -1 = anomaly, 1 = normal
         anomaly_score = model.decision_function(row)[0] # lower = more suspicious
 
-        is_fraud     = bool(prediction == -1)
+        # Threshold tuned based on observed score distribution
+        is_fraud     = bool(bool(prediction == -1) or bool(anomaly_score < 0.08))
         risk_level   = _get_risk_level(anomaly_score)
         risk_factors = get_risk_explanation(data)
 
@@ -193,13 +194,13 @@ def predict():
             "amount":        data.get("amount", 0),
             "risk_factors":  risk_factors,
             "input_summary": {
-                "merchant":         data.get("merchant_category"),
-                "type":             data.get("transaction_type"),
-                "country":          data.get("country"),
-                "time_of_day":      data.get("time_of_day"),
-                "card_present":     data.get("card_present"),
-                "velocity":         data.get("velocity"),
-                "account_age":      data.get("account_age_months"),
+                "merchant":     data.get("merchant_category"),
+                "type":         data.get("transaction_type"),
+                "country":      data.get("country"),
+                "time_of_day":  data.get("time_of_day"),
+                "card_present": str(data.get("card_present")),
+                "velocity":     data.get("velocity"),
+                "account_age":  data.get("account_age_months"),
             }
         })
 
@@ -208,9 +209,9 @@ def predict():
 
 
 def _get_risk_level(anomaly_score: float) -> str:
-    if anomaly_score < -0.1:
+    if anomaly_score < 0.08:
         return "HIGH"
-    elif anomaly_score < 0.0:
+    elif anomaly_score < 0.12:
         return "MEDIUM"
     else:
         return "LOW"

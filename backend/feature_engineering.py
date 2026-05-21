@@ -113,13 +113,13 @@ def engineer_features(form_data: dict) -> list:
     V[1]  = -1.8 * amount_risk - 1.2 * merchant_risk + 0.3
 
     # V3  — velocity / transaction frequency signal
-    V[2]  = -3.0 * velocity_risk - 1.5 * time_risk + 0.8
+    V[2]  = -4.0 * velocity_risk - 2.5 * time_risk - 2.0 * card_risk + 0.8
 
     # V4  — merchant category risk
     V[3]  = 1.2 * (1 - merchant_risk) - 0.8 * type_risk
 
     # V5  — geographic / international signal
-    V[4]  = -2.2 * country_risk - 1.0 * type_risk + 0.4
+    V[4]  = -3.5 * country_risk - 2.0 * type_risk - 1.5 * card_risk + 0.4
 
     # V6  — time-of-day anomaly
     V[5]  = -1.5 * time_risk - 0.8 * day_risk + 0.6
@@ -146,13 +146,18 @@ def engineer_features(form_data: dict) -> list:
     V[12] = -1.8 * day_risk - 1.5 * time_risk + 0.3
 
     # V14 — strong fraud composite (most important feature in dataset)
-    V[13] = -(
-        1.5 * card_risk +
-        1.2 * device_risk +
-        1.0 * country_risk +
-        0.8 * dispute_risk +
-        0.5 * velocity_risk
-    ) + 0.5
+    fraud_signal = (
+        3.5 * card_risk +
+        3.2 * device_risk +
+        3.0 * country_risk +
+        2.8 * dispute_risk +
+        2.5 * velocity_risk +
+        2.0 * amount_risk +
+        2.0 * ship_risk +
+        1.5 * time_risk +
+        1.5 * age_risk
+    )
+    V[13] = -fraud_signal + 0.3
 
     # V15 — atm/cash withdrawal signal
     V[14] = -2.0 * (1 if transaction_type == "atm_withdrawal" else 0) \
